@@ -1,0 +1,39 @@
+{
+  "siteTitle": "My Link Repository",
+  "siteDescription": "A curated collection of useful links",
+  "sections": [
+    {
+      "id": "tools",
+      "title": "Tools",
+      "links": [
+        {
+          "name": "Example Tool",
+          "url": "https://example.com",
+          "description": "A short description of what this is and why it's useful."
+        }
+      ]
+    },
+    {
+      "id": "articles",
+      "title": "Articles & Reading",
+      "links": [
+        {
+          "name": "Example Article",
+          "url": "https://example.com",
+          "description": "Short description here."
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Resources",
+      "links": [
+        {
+          "name": "Example Resource",
+          "url": "https://example.com",
+          "description": "Short description here."
+        }
+      ]
+    }
+  ]
+}
