@@ -3,24 +3,49 @@
   "siteDescription": "A curated collection of useful links",
   "sections": [
     {
-      "id": "tools",
-      "title": "Tools",
+      "id": "Hobbies",
+      "title": "Hobbies",
       "links": [
         {
-          "name": "Example Tool",
-          "url": "https://example.com",
-          "description": "A short description of what this is and why it's useful."
-        }
-      ]
+          "name": "MLR Reference",
+          "url": "https://stats.mlr.gg/#/stats",
+          "description": "MLR Stats Page"
+        },
+        {
+          "name": "MLN Reference",
+          "url": "https://www.mln-reference.com",
+          "description": "MLN Stats Page"
+        },
+        {
+          "name": "Fantasy F1",
+          "url": "https://fantasygp.com/start/",
+          "description": "Fantasy F1 Homepage"
+        },
+        {
+          "name": "Caught looking",
+          "url": "https://www.caughtlooking.app/",
+          "description": "Baseball Score card app"
+        },
+        {
+          "name": "F1 Timing Data",
+          "url": "https://racing.recursiveprojects.cloud/",
+          "description": "f1 data"
+        }        
+      ]https://f1-start.jakearchibald.com/
     },
     {
-      "id": "articles",
-      "title": "Articles & Reading",
+      "id": "Games",
+      "title": "Web Games",
       "links": [
         {
-          "name": "Example Article",
-          "url": "https://example.com",
-          "description": "Short description here."
+          "name": "Homer Hindsight",
+          "url": "https://www.homerhindsight.com",
+          "description": "HR Guessing Game."
+        },
+        {
+          "name": "F1 Reaction Time Game",
+          "url": "https://f1-start.jakearchibald.com/",
+          "description": "Raction Time Game"
         }
       ]
     },
