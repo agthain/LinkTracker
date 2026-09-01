@@ -17,6 +17,11 @@
           "description": "MLN Stats Page"
         },
         {
+          "name": "MLN Gameday",
+          "url": "https://mlngameday.com",
+          "description": "MLN Gameday"
+        },
+        {
           "name": "Fantasy F1",
           "url": "https://fantasygp.com/start/",
           "description": "Fantasy F1 Homepage"
