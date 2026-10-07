@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Decide">
+<meta name="theme-color" content="#14172B">
+<title>Decide</title>
+<style>
+  :root {
+    --bg: #14172B;
+    --surface: #1F2340;
+    --pass: #FF5A5F;
+    --like: #3DDC97;
+    --super: #FFC53D;
+    --text: #F4F5FB;
+    --muted: #9AA0C3;
+    --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: var(--font); overscroll-behavior: none;
+  }
+  #app {
+    height: 100dvh; display: flex; flex-direction: column;
+    padding: max(env(safe-area-inset-top), 14px) 20px max(env(safe-area-inset-bottom), 14px);
+    max-width: 520px; margin: 0 auto;
+  }
+  h1 { font-size: 30px; font-weight: 800; margin: 8px 0 14px; line-height: 1.1; }
+  .muted { color: var(--muted); }
+  .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+
+  input[type=text] {
+    width: 100%; padding: 13px 14px; font: inherit; font-size: 16px; color: var(--text);
+    background: var(--surface); border: 2px solid transparent; border-radius: 12px; outline: none;
+  }
+  input[type=text]:focus { border-color: var(--like); }
+  .names { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .list-label { font-size: 14px; color: var(--muted); margin: 4px 2px 8px; }
+  .item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; font-size: 17px;
+  }
+  .item button {
+    background: none; border: 0; color: var(--muted); font-size: 20px; padding: 2px 8px; cursor: pointer;
+  }
+  .add { display: flex; gap: 8px; margin-top: 4px; }
+  .add button, .btn {
+    font: inherit; font-weight: 800; font-size: 17px; border: 0; border-radius: 14px; cursor: pointer;
+    padding: 14px 18px; background: var(--like); color: var(--bg);
+  }
+  .btn.block { width: 100%; padding: 16px; margin-top: 12px; }
+  .btn.alt { background: var(--surface); color: var(--text); }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  /* swiping */
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .head h2 { margin: 0; font-size: 22px; font-weight: 800; }
+  .head .count { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .round {
+    width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--surface);
+    color: var(--text); font-size: 20px; cursor: pointer;
+  }
+  .round:disabled { opacity: .35; cursor: default; }
+  .stage { flex: 1; position: relative; min-height: 0; margin-bottom: 18px; }
+  .card {
+    position: absolute; inset: 0; border-radius: 32px; display: flex; align-items: center; justify-content: center;
+    padding: 28px; text-align: center; color: var(--bg); font-size: clamp(34px, 11vw, 52px); font-weight: 800;
+    line-height: 1.1; box-shadow: 0 14px 36px rgba(0,0,0,.4); touch-action: none; user-select: none;
+    -webkit-user-select: none; cursor: grab; word-break: break-word;
+  }
+  .card.back { transform: scale(.94) translateY(14px); opacity: .75; pointer-events: none; }
+  .stamp {
+    position: absolute; padding: 4px 14px; border: 4px solid; border-radius: 10px; font-size: 32px;
+    font-weight: 900; background: rgba(20,23,43,.88); opacity: 0; pointer-events: none;
+  }
+  .stamp[data-kind=like] { color: var(--like); transform: rotate(-12deg); }
+  .stamp[data-kind=pass] { color: var(--pass); transform: rotate(12deg); }
+  .stamp[data-kind=super] { color: var(--super); }
+  .actions { display: flex; justify-content: center; gap: 22px; padding-bottom: 6px; }
+  .act {
+    position: relative; border-radius: 50%; background: var(--surface); border: 2px solid; cursor: pointer;
+    display: grid; place-items: center; font-family: var(--font);
+  }
+  .act.big { width: 66px; height: 66px; font-size: 28px; }
+  .act.mid { width: 56px; height: 56px; font-size: 24px; }
+  .act.pass { color: var(--pass); border-color: var(--pass); }
+  .act.like { color: var(--like); border-color: var(--like); }
+  .act.super { color: var(--super); border-color: var(--super); }
+  .act.super:disabled { opacity: .35; cursor: default; }
+  .badge {
+    position: absolute; top: -4px; right: -4px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--super); color: var(--bg); font-size: 12px; font-weight: 800; display: grid; place-items: center;
+  }
+  .shake { animation: shake .3s; }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  /* handoff + results */
+  .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 0 16px; }
+  .center .big { font-size: 56px; }
+  .hero { background: var(--surface); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
+  .hero .title { font-size: 44px; font-weight: 800; line-height: 1.05; margin: 6px 0 12px; word-break: break-word; }
+  .sect { font-size: 16px; font-weight: 800; margin: 18px 0 8px; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--surface); border-radius: 14px; padding: 14px; margin-bottom: 8px; font-size: 18px; font-weight: 700;
+  }
+  .votes { display: flex; gap: 14px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .votes b { margin-left: 4px; font-size: 15px; }
+  .v-like { color: var(--like); } .v-pass { color: var(--pass); } .v-super { color: var(--super); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const SUPERS_PER_PERSON = 2;   // change to 1 if you want it scarcer
+const CARD_COLORS = ['#BFD7FF', '#FFD6E0', '#C7F2D8', '#FFE3B3', '#E2D4FF', '#BDEBF0'];
+const SCORE = { pass: 0, like: 1, super: 3 };
+const GLYPH = { pass: '✕', like: '♥', super: '★' };
+
+const state = {
+  phase: 'setup',            // setup | swiping | handoff | results
+  names: ['', ''],
+  options: ['Tacos', 'Sushi', 'Pizza', 'Thai', 'Burgers', 'Ramen', 'Indian', 'Cook at home'],
+  person: 0,
+  index: 0,
+  votes: [[], []],
+  supers: [SUPERS_PER_PERSON, SUPERS_PER_PERSON],
+};
+let flying = false;
+
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const name = i => state.names[i].trim() || (i === 0 ? 'Person 1' : 'Person 2');
+const buzz = ms => { if (navigator.vibrate) navigator.vibrate(ms); };
+
+function render() {
+  ({ setup: renderSetup, swiping: renderSwipe, handoff: renderHandoff, results: renderResults })[state.phase]();
+}
+
+/* ---------- setup ---------- */
+function renderSetup() {
+  app.innerHTML = `
+    <h1>What are we deciding?</h1>
+    <div class="names">
+      <input type="text" id="n0" placeholder="Person 1" value="${esc(state.names[0])}" maxlength="20">
+      <input type="text" id="n1" placeholder="Person 2" value="${esc(state.names[1])}" maxlength="20">
+    </div>
+    <div class="list-label">${state.options.length} options. Tap ✕ to remove one.</div>
+    <div class="scroll">
+      ${state.options.map((o, i) => `<div class="item"><span>${esc(o)}</span><button data-del="${i}" aria-label="Remove ${esc(o)}">✕</button></div>`).join('')}
+      <div class="add">
+        <input type="text" id="newItem" placeholder="Add an option" maxlength="60" enterkeyhint="done">
+        <button id="addBtn">Add</button>
+      </div>
+    </div>
+    <button class="btn block" id="startBtn" ${state.options.length < 2 ? 'disabled' : ''}>Start swiping</button>`;
+
+  document.getElementById('n0').oninput = e => state.names[0] = e.target.value;
+  document.getElementById('n1').oninput = e => state.names[1] = e.target.value;
+  const input = document.getElementById('newItem');
+  const add = () => {
+    const v = input.value.trim();
+    if (!v) return;
+    state.options.push(v);
+    renderSetup();
+    document.getElementById('newItem').focus();
+  };
+  document.getElementById('addBtn').onclick = add;
+  input.onkeydown = e => { if (e.key === 'Enter') add(); };
+  app.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    state.options.splice(+b.dataset.del, 1);
+    renderSetup();
+  });
+  document.getElementById('startBtn').onclick = startRound;
+}
+
+function startRound() {
+  state.votes = [[], []];
+  state.supers = [SUPERS_PER_PERSON, SUPERS_PER_PERSON];
+  state.person = 0;
+  state.index = 0;
+  state.phase = 'swiping';
+  render();
+}
+
+/* ---------- swiping ---------- */
+function renderSwipe() {
+  const { options, index, person } = state;
+  const cur = options[index];
+  const nxt = options[index + 1];
+  const left = state.supers[person];
+
+  app.innerHTML = `
+    <div class="head">
+      <div>
+        <h2>${esc(name(person))}'s turn</h2>
+        <div class="count">${index + 1} of ${options.length}</div>
+      </div>
+      <button class="round" id="undo" aria-label="Undo" ${index === 0 ? 'disabled' : ''}>↶</button>
+    </div>
+    <div class="stage">
+      ${nxt !== undefined ? `<div class="card back" style="background:${CARD_COLORS[(index + 1) % CARD_COLORS.length]}">${esc(nxt)}</div>` : ''}
+      <div class="card" id="card" style="background:${CARD_COLORS[index % CARD_COLORS.length]}">
+        ${esc(cur)}
+        <div class="stamp" id="stamp"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="act big pass" id="bPass" aria-label="Nope">✕</button>
+      <button class="act mid super" id="bSuper" aria-label="Super swipe" ${left === 0 ? 'disabled' : ''}>★<span class="badge">${left}</span></button>
+      <button class="act big like" id="bLike" aria-label="Yes">♥</button>
+    </div>`;
+
+  const card = document.getElementById('card');
+  attachDrag(card);
+  document.getElementById('bPass').onclick = () => commit('pass', card);
+  document.getElementById('bLike').onclick = () => commit('like', card);
+  document.getElementById('bSuper').onclick = () => commit('super', card);
+  document.getElementById('undo').onclick = undo;
+}
+
+function pendingKind(dx, dy) {
+  if (dy < -70 && Math.abs(dx) < 90 && state.supers[state.person] > 0) return 'super';
+  if (dx > 40) return 'like';
+  if (dx < -40) return 'pass';
+  return null;
+}
+
+function attachDrag(card) {
+  const stamp = card.querySelector('#stamp');
+  let sx = 0, sy = 0, dx = 0, dy = 0, active = false;
+
+  card.addEventListener('pointerdown', e => {
+    if (flying) return;
+    active = true; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+    card.setPointerCapture(e.pointerId);
+    card.style.transition = 'none';
+  });
+  card.addEventListener('pointermove', e => {
+    if (!active) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 20}deg)`;
+    const k = pendingKind(dx, dy);
+    if (k) {
+      stamp.dataset.kind = k;
+      stamp.textContent = { like: 'YES', pass: 'NOPE', super: 'SUPER' }[k];
+      stamp.style.opacity = 1;
+    } else {
+      stamp.style.opacity = 0;
+    }
+  });
+  const end = () => {
+    if (!active) return;
+    active = false;
+    if (dy < -120 && Math.abs(dx) < 120 && state.supers[state.person] > 0) return commit('super', card);
+    if (dx > 110) return commit('like', card);
+    if (dx < -110) return commit('pass', card);
+    card.style.transition = 'transform .3s cubic-bezier(.2,.9,.3,1.3)';
+    card.style.transform = '';
+    stamp.style.opacity = 0;
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+
+function commit(vote, card) {
+  if (flying) return;
+  if (vote === 'super' && state.supers[state.person] === 0) {
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    buzz(40);
+    return;
+  }
+  flying = true;
+  buzz(vote === 'super' ? 30 : 15);
+  const target = { like: 'translate(700px, 0) rotate(30deg)', pass: 'translate(-700px, 0) rotate(-30deg)', super: 'translate(0, -900px)' }[vote];
+  card.style.transition = 'transform .22s ease-in';
+  card.style.transform = target;
+  setTimeout(() => { cast(vote); flying = false; }, 220);
+}
+
+function cast(vote) {
+  const p = state.person;
+  if (vote === 'super') state.supers[p]--;
+  state.votes[p].push(vote);
+  state.index++;
+  if (state.index >= state.options.length) {
+    state.phase = p === 0 ? 'handoff' : 'results';
+  }
+  render();
+}
+
+function undo() {
+  if (flying || state.index === 0) return;
+  const last = state.votes[state.person].pop();
+  if (last === 'super') state.supers[state.person]++;
+  state.index--;
+  render();
+}
+
+/* ---------- handoff ---------- */
+function renderHandoff() {
+  app.innerHTML = `
+    <div class="center">
+      <div class="big">📱</div>
+      <h1>${esc(name(0))} is done</h1>
+      <div class="muted">Pass the phone to ${esc(name(1))}. Their picks stay hidden until you both finish.</div>
+    </div>
+    <button class="btn block" id="go">I'm ${esc(name(1))}, start</button>`;
+  document.getElementById('go').onclick = () => {
+    state.person = 1; state.index = 0; state.phase = 'swiping'; render();
+  };
+}
+
+/* ---------- results ---------- */
+function getRows() {
+  return state.options.map((title, i) => {
+    const a = state.votes[0][i], b = state.votes[1][i];
+    return { title, a, b, order: i, score: SCORE[a] + SCORE[b], match: a !== 'pass' && b !== 'pass' };
+  }).sort((x, y) => y.score - x.score || x.order - y.order);
+}
+
+function votePair(r) {
+  return `<div class="votes">
+    <span>${esc(name(0))}<b class="v-${r.a}">${GLYPH[r.a]}</b></span>
+    <span>${esc(name(1))}<b class="v-${r.b}">${GLYPH[r.b]}</b></span>
+  </div>`;
+}
+
+function section(title, rows) {
+  if (!rows.length) return '';
+  return `<div class="sect">${title}</div>` +
+    rows.map(r => `<div class="row"><span>${esc(r.title)}</span>${votePair(r)}</div>`).join('');
+}
+
+function renderResults() {
+  const rows = getRows();
+  const matches = rows.filter(r => r.match);
+  const oneSided = rows.filter(r => !r.match && r.score > 0);
+  const top = matches[0];
+
+  app.innerHTML = `
+    <div class="scroll">
+      ${top ? `
+        <div class="hero">
+          <div class="muted">You're going with</div>
+          <div class="title">${esc(top.title)}</div>
+          ${votePair(top)}
+        </div>` : `
+        <h1>No overlap</h1>
+        <div class="muted">You never both said yes. Check the one-sided picks below or run it again.</div>`}
+      ${section('Both said yes', matches.slice(1))}
+      ${section('Only one of you said yes', oneSided)}
+    </div>
+    <div class="two">
+      <button class="btn block" id="again">Swipe again</button>
+      <button class="btn block alt" id="edit">Edit list</button>
+    </div>`;
+  document.getElementById('again').onclick = startRound;
+  document.getElementById('edit').onclick = () => { state.phase = 'setup'; render(); };
+}
+
+render();
+</script>
+</body>
+</html>
