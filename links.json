@@ -62,7 +62,12 @@
           "name": "ranker",
           "url": "https://agthain.github.io/LinkTracker/ranker",
           "description": "Elo ranking tool"
-        }
+        },
+        {
+          "name": "decider",
+          "url": "https://agthain.github.io/LinkTracker/decider",
+          "description": "swiping deciding tool"
+        
       ]
     }
   ]
