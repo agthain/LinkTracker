@@ -59,9 +59,9 @@
       "title": "Resources",
       "links": [
         {
-          "name": "Example Resource",
-          "url": "https://example.com",
-          "description": "Short description here."
+          "name": "ranker",
+          "url": "https://agthain.github.io/LinkTracker/ranker",
+          "description": "Elo ranking tool"
         }
       ]
     }
